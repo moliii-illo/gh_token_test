@@ -16,9 +16,9 @@ jobs:
   comment:
 
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
-
       - name: Read README from private repo
         id: readme
         run: |
