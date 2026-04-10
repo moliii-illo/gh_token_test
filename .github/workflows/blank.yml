@@ -1,0 +1,41 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+on:
+  issues:
+    types:
+      - opened
+      
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  comment:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Read README from private repo
+        id: readme
+        run: |
+          # Fetch README from the private repo using GitHub API
+          content=$(gh api repos/moliii-illo/codespaces/contents/README.md \
+            --jq '.content | @base64d')
+          
+          # Handle multiline content for GitHub Actions
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$content" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on issue
+        run: |
+          gh issue comment ${{ github.event.issue.number }} \
+            --body "${{ steps.readme.outputs.body }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
