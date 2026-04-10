@@ -17,24 +17,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Read README from private repo
-        id: readme
+      - name: Debug - Check repo access
         run: |
-          # Fetch README from the correct repo using GitHub API
-          content=$(gh api repos/moliii-illo/codespaces/contents/README.md \
-            --jq '.content | @base64d')
-          
-          # Handle multiline content for GitHub Actions
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$content" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Testing API access..."
+          gh api repos/moliii-illo/codespaces --jq '.name, .private' || echo "Repo not accessible"
+          echo "Listing repo contents..."
+          gh api repos/moliii-illo/codespaces/contents || echo "Cannot list contents"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Comment on issue
-        run: |
-          gh issue comment ${{ github.event.issue.number }} \
-            --body "${{ steps.readme.outputs.body }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
+      # - name: Comment on issue
+      #   run: |
+      #     gh issue comment ${{ github.event.issue.number }} \
+      #       --body "${{ steps.readme.outputs.body }}"
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GH_REPO: ${{ github.repository }}
